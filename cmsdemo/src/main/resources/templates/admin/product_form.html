@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Product Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0" th:text="${product.id == null} ? 'Create New Product' : 'Edit Product'">Form</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Thêm enctype để hỗ trợ upload file -->
+                        <form th:action="@{/admin/products/save}" th:object="${product}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" th:field="*{id}" />
+                            <!-- Giữ lại đường dẫn ảnh cũ nếu có -->
+                            <input type="hidden" th:field="*{imageUrl}" />
+
+                            <div class="mb-3">
+                                <label class="form-label">Product Name</label>
+                                <input type="text" th:field="*{name}" class="form-control" required />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Price (VND)</label>
+                                    <input type="number" step="1000" th:field="*{price}" class="form-control" required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Product Image</label>
+                                    <!-- Input file -->
+                                    <input type="file" name="image" class="form-control" accept="image/*" />
+
+                                    <!-- Hiển thị ảnh hiện tại nếu đang edit -->
+                                    <div th:if="${product.imageUrl}" class="mt-2">
+                                        <p class="text-muted small">Current Image:</p>
+                                        <img th:src="${product.imageUrl}" style="height: 100px;" class="img-thumbnail"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea th:field="*{description}" class="form-control" rows="4"></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success">Save Product</button>
+                                <a th:href="@{/admin/products}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
