@@ -2,6 +2,7 @@ package com.hoangnm.cmsdemo.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -21,9 +22,10 @@ public class User {
     @Column(nullable = false)
     private String role;
     
-    // Thêm email
+    @Column(unique = true) // Email nên là duy nhất
     private String email;
     
-    // Thêm token reset pass
-    private String resetToken;
+    // OTP
+    private String otp;
+    private LocalDateTime otpRequestedTime;
 }

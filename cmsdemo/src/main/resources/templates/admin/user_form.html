@@ -17,7 +17,7 @@
                             <input type="hidden" th:field="*{id}" />
                             <input type="hidden" name="source" th:value="${source}" />
 
-                            <!-- Username: Chỉ cho nhập khi tạo mới, khi sửa thì Read-only -->
+                            <!-- Username -->
                             <div class="mb-3">
                                 <label class="form-label">Username</label>
                                 <input type="text" th:field="*{username}" class="form-control"
@@ -27,24 +27,28 @@
                                 <div th:if="${user.id != null}" class="form-text text-muted">Username cannot be changed.</div>
                             </div>
 
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" th:field="*{email}" class="form-control" required />
+                                <div class="form-text">Used for password recovery.</div>
+                            </div>
+
+                            <!-- Password -->
                             <div class="mb-3">
                                 <label class="form-label">Password</label>
                                 <input type="password" th:field="*{password}" class="form-control" placeholder="Enter new password" />
                                 <div th:if="${user.id != null}" class="form-text">Leave blank to keep current password.</div>
                             </div>
 
-                            <!-- Role Logic -->
+                            <!-- Role -->
                             <div class="mb-3">
                                 <label class="form-label">Role</label>
-
-                                <!-- Trường hợp 1: Đang sửa một ADMIN -> Không cho đổi Role -->
                                 <div th:if="${user.id != null and user.role == 'ROLE_ADMIN'}">
                                     <input type="text" class="form-control bg-light" value="Admin (Quản trị viên)" readonly />
                                     <input type="hidden" th:field="*{role}" />
                                     <div class="form-text text-danger">Cannot change role of an Admin.</div>
                                 </div>
-
-                                <!-- Trường hợp 2: Tạo mới HOẶC Đang sửa User thường -> Cho phép chọn -->
                                 <div th:if="${user.id == null or user.role != 'ROLE_ADMIN'}">
                                     <select th:field="*{role}" class="form-select">
                                         <option value="ROLE_USER">User (Khách hàng)</option>

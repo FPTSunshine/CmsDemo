@@ -2,6 +2,7 @@ package com.hoangnm.cmsdemo.controller;
 
 import com.hoangnm.cmsdemo.entity.User;
 import com.hoangnm.cmsdemo.repository.UserRepository;
+import com.hoangnm.cmsdemo.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -10,11 +11,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.Random;
 
 @Controller
 public class AuthController {
+
+    private static final long OTP_VALID_DURATION = 5; // 5 phút
 
     @Autowired
     private UserRepository userRepository;
@@ -22,67 +26,84 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // 1. Hiển thị form nhập Email
+    @Autowired
+    private EmailService emailService;
+
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
         return "forgot_password";
     }
 
-    // 2. Xử lý gửi Token
     @PostMapping("/forgot-password")
     public String processForgotPassword(@RequestParam("email") String email, Model model) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        
-        if (userOptional.isEmpty()) {
+        if (userRepository.findByEmail(email).isEmpty()) {
             model.addAttribute("error", "Email not found!");
             return "forgot_password";
         }
 
-        User user = userOptional.get();
-        // Tạo token ngẫu nhiên
-        String token = UUID.randomUUID().toString();
-        user.setResetToken(token);
-        userRepository.save(user);
-
-        // GIẢ LẬP GỬI MAIL: In ra console
-        String resetLink = "http://localhost:8080/reset-password?token=" + token;
-        System.out.println("==========================================");
-        System.out.println("EMAIL SENT TO: " + email);
-        System.out.println("RESET LINK: " + resetLink);
-        System.out.println("==========================================");
-
-        model.addAttribute("message", "We have sent a reset link to your email. Please check console for demo link.");
-        return "forgot_password";
-    }
-
-    // 3. Hiển thị form nhập mật khẩu mới (khi bấm vào link)
-    @GetMapping("/reset-password")
-    public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
-        Optional<User> userOptional = userRepository.findByResetToken(token);
+        String otp = String.format("%06d", new Random().nextInt(999999));
         
-        if (userOptional.isEmpty()) {
-            model.addAttribute("error", "Invalid Token!");
-            return "login"; // Hoặc trang lỗi
+        // SỬA LỖI: Chỉ update các trường cần thiết, không đụng đến password
+        userRepository.updateOtp(otp, LocalDateTime.now(), email);
+
+        try {
+            emailService.sendOtpEmail(email, otp);
+        } catch (Exception e) {
+            model.addAttribute("error", "Error sending email. Check your credentials in application.properties.");
+            e.printStackTrace();
+            return "forgot_password";
         }
 
-        model.addAttribute("token", token);
+        return "redirect:/verify-otp?email=" + email;
+    }
+
+    @GetMapping("/verify-otp")
+    public String showVerifyOtpForm(@RequestParam("email") String email, Model model) {
+        model.addAttribute("email", email);
+        return "verify_otp";
+    }
+
+    @PostMapping("/verify-otp")
+    public String processVerifyOtp(@RequestParam("email") String email, @RequestParam("otp") String otp, Model model) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty() || userOptional.get().getOtp() == null || !userOptional.get().getOtp().equals(otp)) {
+            model.addAttribute("error", "Invalid OTP!");
+            model.addAttribute("email", email);
+            return "verify_otp";
+        }
+
+        User user = userOptional.get();
+        if (user.getOtpRequestedTime().plusMinutes(OTP_VALID_DURATION).isBefore(LocalDateTime.now())) {
+            model.addAttribute("error", "OTP has expired!");
+            model.addAttribute("email", email);
+            return "verify_otp";
+        }
+
+        return "redirect:/reset-password?otp=" + otp;
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordForm(@RequestParam("otp") String otp, Model model) {
+        Optional<User> userOptional = userRepository.findByOtp(otp);
+        if (userOptional.isEmpty()) {
+            return "redirect:/forgot-password?error=Invalid+session";
+        }
+        model.addAttribute("otp", otp);
         return "reset_password";
     }
 
-    // 4. Xử lý đổi mật khẩu
     @PostMapping("/reset-password")
-    public String processResetPassword(@RequestParam("token") String token, 
-                                       @RequestParam("password") String password, Model model) {
-        Optional<User> userOptional = userRepository.findByResetToken(token);
-        
+    public String processResetPassword(@RequestParam("otp") String otp, @RequestParam("password") String password, Model model) {
+        Optional<User> userOptional = userRepository.findByOtp(otp);
         if (userOptional.isEmpty()) {
-            model.addAttribute("error", "Invalid Token!");
-            return "login";
+            return "redirect:/forgot-password?error=Invalid+session";
         }
 
         User user = userOptional.get();
-        user.setPassword(passwordEncoder.encode(password)); // Mã hóa pass mới
-        user.setResetToken(null); // Xóa token sau khi dùng xong
+        user.setPassword(passwordEncoder.encode(password));
+        user.setOtp(null);
+        user.setOtpRequestedTime(null);
         userRepository.save(user);
 
         return "redirect:/login?message=Password+changed+successfully";

@@ -27,10 +27,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            // Tạm thời bỏ qua CSRF cho các đường dẫn public để test
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**", "/forgot-password", "/reset-password")
+            )
             .authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                .requestMatchers("/forgot-password", "/reset-password").permitAll()
-                .requestMatchers("/api/**").permitAll() // MỞ KHÓA API
+                .requestMatchers("/forgot-password", "/reset-password", "/verify-otp").permitAll()
+                .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
