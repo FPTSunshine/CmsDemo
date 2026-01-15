@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "users") // Tránh dùng tên 'user' vì có thể trùng từ khóa SQL
+@Table(name = "users")
 @Data
 public class User {
 
@@ -16,8 +16,14 @@ public class User {
     private String username;
 
     @Column(nullable = false)
-    private String password; // Sẽ lưu BCrypt Hash
+    private String password;
 
     @Column(nullable = false)
-    private String role; // Ví dụ: "ROLE_ADMIN", "ROLE_USER"
+    private String role;
+    
+    // Thêm email
+    private String email;
+    
+    // Thêm token reset pass
+    private String resetToken;
 }

@@ -9,7 +9,7 @@ public class MainController {
 
     @GetMapping("/login")
     public String login() {
-        return "login"; // Trả về file login.html
+        return "login";
     }
 
     @GetMapping("/default")
@@ -22,6 +22,7 @@ public class MainController {
     
     @GetMapping("/")
     public String home() {
-        return "redirect:/login"; // Vào trang chủ thì đẩy về login
+        // Thay vì về login, ta về default để hệ thống tự kiểm tra
+        return "redirect:/default";
     }
 }

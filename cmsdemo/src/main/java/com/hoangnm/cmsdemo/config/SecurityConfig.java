@@ -1,5 +1,7 @@
 package com.hoangnm.cmsdemo.config;
 
+import com.hoangnm.cmsdemo.service.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,28 +9,59 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private DataSource dataSource;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập tài nguyên tĩnh
-                .requestMatchers("/admin/**").hasRole("ADMIN") // Chỉ ADMIN mới vào được /admin/**
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN") // USER và ADMIN đều vào được /user/**
-                .anyRequest().authenticated() // Các trang khác bắt buộc phải đăng nhập
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                .requestMatchers("/forgot-password", "/reset-password").permitAll()
+                .requestMatchers("/api/**").permitAll() // MỞ KHÓA API
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                .anyRequest().authenticated()
             )
             .formLogin((form) -> form
-                .loginPage("/login") // Trang login tùy chỉnh (mình sẽ tạo sau)
-                .defaultSuccessUrl("/default", true) // Đăng nhập thành công thì chuyển hướng vào đây để xử lý tiếp
+                .loginPage("/login")
+                .defaultSuccessUrl("/default", true)
                 .permitAll()
             )
-            .logout((logout) -> logout.permitAll());
+            .rememberMe((remember) -> remember
+                .tokenRepository(persistentTokenRepository())
+                .tokenValiditySeconds(86400 * 14)
+                .userDetailsService(customUserDetailsService)
+                .rememberMeParameter("remember-me")
+                .alwaysRemember(true)
+            )
+            .logout((logout) -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .deleteCookies("JSESSIONID", "remember-me")
+                .permitAll()
+            );
 
         return http.build();
+    }
+
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
+        tokenRepository.setDataSource(dataSource);
+        return tokenRepository;
     }
 
     @Bean

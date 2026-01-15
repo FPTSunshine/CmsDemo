@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 @RequestMapping("/admin")
 public class AdminController {
 
-    // Đường dẫn thư mục lưu ảnh (tương đối so với thư mục chạy dự án)
     public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/src/main/resources/static/uploads";
 
     @Autowired
@@ -33,7 +32,11 @@ public class AdminController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/dashboard")
-    public String dashboard() {
+    public String dashboard(Model model) {
+        model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("products", productRepository.findAll());
+        model.addAttribute("userCount", userRepository.count());
+        model.addAttribute("productCount", productRepository.count());
         return "admin/dashboard";
     }
 
@@ -54,7 +57,8 @@ public class AdminController {
     }
 
     @PostMapping("/users/save")
-    public String saveUser(@ModelAttribute("user") User user) {
+    public String saveUser(@ModelAttribute("user") User user, 
+                           @RequestParam(value = "source", required = false) String source) {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
              user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -62,23 +66,36 @@ public class AdminController {
             user.setRole("ROLE_USER");
         }
         userRepository.save(user);
+        
+        // Điều hướng dựa trên nguồn
+        if ("dashboard".equals(source)) {
+            return "redirect:/admin/dashboard";
+        }
         return "redirect:/admin/users";
     }
 
     @GetMapping("/users/edit/{id}")
-    public String showEditUserForm(@PathVariable("id") Long id, Model model) {
+    public String showEditUserForm(@PathVariable("id") Long id, 
+                                   @RequestParam(value = "source", required = false) String source,
+                                   Model model) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         user.setPassword(""); 
         model.addAttribute("user", user);
+        model.addAttribute("source", source); // Truyền source sang view để giữ lại
         return "admin/user_form";
     }
 
     @GetMapping("/users/delete/{id}")
-    public String deleteUser(@PathVariable("id") Long id) {
+    public String deleteUser(@PathVariable("id") Long id,
+                             @RequestParam(value = "source", required = false) String source) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         userRepository.delete(user);
+        
+        if ("dashboard".equals(source)) {
+            return "redirect:/admin/dashboard";
+        }
         return "redirect:/admin/users";
     }
 
@@ -100,40 +117,46 @@ public class AdminController {
 
     @PostMapping("/products/save")
     public String saveProduct(@ModelAttribute("product") Product product, 
-                              @RequestParam("image") MultipartFile file) throws IOException {
+                              @RequestParam("image") MultipartFile file,
+                              @RequestParam(value = "source", required = false) String source) throws IOException {
         
-        // Logic upload ảnh
         if (!file.isEmpty()) {
             StringBuilder fileNames = new StringBuilder();
             Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, file.getOriginalFilename());
             fileNames.append(file.getOriginalFilename());
             Files.write(fileNameAndPath, file.getBytes());
-            
-            // Lưu đường dẫn vào DB (ví dụ: /uploads/anh.jpg)
             product.setImageUrl("/uploads/" + fileNames.toString());
-        } else {
-            // Nếu không upload ảnh mới, giữ nguyên ảnh cũ (nếu đang edit)
-            // Cần logic lấy ảnh cũ từ DB nếu id != null, nhưng ở đây để đơn giản mình bỏ qua
-            // Hoặc bạn có thể thêm hidden field chứa ảnh cũ ở form
         }
 
         productRepository.save(product);
+        
+        if ("dashboard".equals(source)) {
+            return "redirect:/admin/dashboard";
+        }
         return "redirect:/admin/products";
     }
 
     @GetMapping("/products/edit/{id}")
-    public String showEditProductForm(@PathVariable("id") Long id, Model model) {
+    public String showEditProductForm(@PathVariable("id") Long id, 
+                                      @RequestParam(value = "source", required = false) String source,
+                                      Model model) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid product Id:" + id));
         model.addAttribute("product", product);
+        model.addAttribute("source", source);
         return "admin/product_form";
     }
 
     @GetMapping("/products/delete/{id}")
-    public String deleteProduct(@PathVariable("id") Long id) {
+    public String deleteProduct(@PathVariable("id") Long id,
+                                @RequestParam(value = "source", required = false) String source) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid product Id:" + id));
         productRepository.delete(product);
+        
+        if ("dashboard".equals(source)) {
+            return "redirect:/admin/dashboard";
+        }
         return "redirect:/admin/products";
     }
 }

@@ -13,11 +13,11 @@
                         <h4 class="mb-0" th:text="${product.id == null} ? 'Create New Product' : 'Edit Product'">Form</h4>
                     </div>
                     <div class="card-body">
-                        <!-- Thêm enctype để hỗ trợ upload file -->
                         <form th:action="@{/admin/products/save}" th:object="${product}" method="post" enctype="multipart/form-data">
                             <input type="hidden" th:field="*{id}" />
-                            <!-- Giữ lại đường dẫn ảnh cũ nếu có -->
                             <input type="hidden" th:field="*{imageUrl}" />
+                            <!-- Input ẩn để giữ giá trị source -->
+                            <input type="hidden" name="source" th:value="${source}" />
 
                             <div class="mb-3">
                                 <label class="form-label">Product Name</label>
@@ -31,10 +31,8 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Product Image</label>
-                                    <!-- Input file -->
                                     <input type="file" name="image" class="form-control" accept="image/*" />
 
-                                    <!-- Hiển thị ảnh hiện tại nếu đang edit -->
                                     <div th:if="${product.imageUrl}" class="mt-2">
                                         <p class="text-muted small">Current Image:</p>
                                         <img th:src="${product.imageUrl}" style="height: 100px;" class="img-thumbnail"/>
@@ -49,7 +47,8 @@
 
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-success">Save Product</button>
-                                <a th:href="@{/admin/products}" class="btn btn-secondary">Cancel</a>
+                                <!-- Nút Cancel thông minh -->
+                                <a th:href="${source == 'dashboard'} ? @{/admin/dashboard} : @{/admin/products}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>

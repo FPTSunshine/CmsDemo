@@ -1,63 +1,75 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Home - Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .product-img { height: 200px; object-fit: cover; }
-        .card { transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    </style>
-</head>
+<head th:replace="~{fragments/layout :: head}"></head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="#">CMS SHOP</a>
-            <div class="d-flex">
-                <span class="navbar-text me-3">Hello, User!</span>
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
-                </form>
+
+    <!-- Gọi Header User -->
+    <nav th:replace="~{fragments/layout :: user-header}"></nav>
+
+    <!-- Banner Quảng cáo (Carousel) -->
+    <div id="heroCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active" style="height: 400px; background: linear-gradient(45deg, #007bff, #6610f2);">
+                <div class="d-flex align-items-center justify-content-center h-100 text-white text-center">
+                    <div>
+                        <h1 class="display-3 fw-bold">New iPhone 15 Pro</h1>
+                        <p class="lead">Titanium. So strong. So light. So Pro.</p>
+                        <button class="btn btn-light btn-lg rounded-pill px-4">Buy Now</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <div class="bg-primary text-white text-center py-5 mb-5">
-        <div class="container">
-            <h1 class="display-4">Welcome to Our Store</h1>
-            <p class="lead">Find the best products here.</p>
-        </div>
-    </div>
-
-    <!-- Product List -->
-    <div class="container mb-5">
-        <h2 class="mb-4 text-center">Featured Products</h2>
-
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            <div class="col" th:each="product : ${products}">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" class="card-img-top product-img" alt="Product Image">
-                    <div th:unless="${product.imageUrl}" class="card-img-top product-img bg-secondary d-flex align-items-center justify-content-center text-white">
-                        No Image
-                    </div>
-
-                    <div class="card-body">
-                        <h5 class="card-title" th:text="${product.name}">Product Name</h5>
-                        <p class="card-text text-muted" th:text="${product.description}">Description...</p>
-                        <h4 class="text-primary" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">Price</h4>
-                    </div>
-                    <div class="card-footer bg-white border-0 pb-3">
-                        <button class="btn btn-primary w-100">Add to Cart</button>
+            <div class="carousel-item" style="height: 400px; background: linear-gradient(45deg, #28a745, #20c997);">
+                <div class="d-flex align-items-center justify-content-center h-100 text-white text-center">
+                    <div>
+                        <h1 class="display-3 fw-bold">Samsung Galaxy S24</h1>
+                        <p class="lead">Galaxy AI is here.</p>
+                        <button class="btn btn-light btn-lg rounded-pill px-4">Explore</button>
                     </div>
                 </div>
             </div>
         </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
     </div>
 
-    <footer class="bg-dark text-white text-center py-3 mt-5">
-        <p class="mb-0">&copy; 2024 CMS Demo. All rights reserved.</p>
-    </footer>
+    <main class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Latest Products</h2>
+            <a href="#" class="text-decoration-none">View All &rarr;</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="col" th:each="product : ${products}">
+                <div class="card h-100 border-0 shadow-sm product-card">
+                    <div class="position-relative">
+                        <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Product Image">
+                        <div th:unless="${product.imageUrl}" class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
+                            <i class="fas fa-image fa-2x"></i>
+                        </div>
+                        <span class="position-absolute top-0 end-0 badge bg-danger m-2">Hot</span>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate" th:text="${product.name}">Product Name</h5>
+                        <p class="card-text text-muted small text-truncate" th:text="${product.description}">Description...</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="h5 mb-0 text-primary fw-bold" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Price</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <button class="btn btn-outline-primary w-100 rounded-pill"><i class="fas fa-cart-plus me-1"></i> Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Gọi Footer -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
 </body>
 </html>

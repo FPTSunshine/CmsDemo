@@ -29,6 +29,7 @@ public class DataSeeder implements CommandLineRunner {
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole("ROLE_ADMIN");
+            admin.setEmail("admin@example.com"); // Email mẫu
             userRepository.save(admin);
         }
 
@@ -38,6 +39,7 @@ public class DataSeeder implements CommandLineRunner {
             user.setUsername("user");
             user.setPassword(passwordEncoder.encode("user123"));
             user.setRole("ROLE_USER");
+            user.setEmail("user@example.com"); // Email mẫu
             userRepository.save(user);
         }
 
