@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Complete Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="card shadow p-4" style="max-width: 450px; width: 100%;">
+        <h3 class="text-center mb-3">Complete Your Registration</h3>
+        <p class="text-muted text-center small">Your email <strong th:text="${email}"></strong> has been verified. Please set a username and password for your account.</p>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <form th:action="@{/complete-registration}" method="post">
+            <input type="hidden" name="email" th:value="${email}" />
+
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Choose a unique username" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Enter a password" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm your password" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Complete Registration</button>
+        </form>
+    </div>
+</body>
+</html>

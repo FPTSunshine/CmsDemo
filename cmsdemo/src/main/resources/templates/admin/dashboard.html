@@ -14,7 +14,7 @@
         <div class="row g-4 mb-5">
             <!-- Card User -->
             <div class="col-md-4">
-                <div class="card text-white bg-primary shadow h-100"
+                <div class="card text-white bg-primary shadow h-100 dashboard-card"
                      id="userCard"
                      data-bs-toggle="popover"
                      data-bs-html="true"
@@ -34,7 +34,7 @@
 
             <!-- Card Product -->
             <div class="col-md-4">
-                <div class="card text-white bg-success shadow h-100"
+                <div class="card text-white bg-success shadow h-100 dashboard-card"
                      id="productCard"
                      data-bs-toggle="popover"
                      data-bs-html="true"
@@ -53,8 +53,8 @@
             </div>
 
             <div class="col-md-4">
-                <div class="card text-white bg-warning shadow h-100">
-                    <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="card text-white bg-warning shadow h-100 dashboard-card">
+                    <div class="card-body d-flex justify-content-between align-items-center" style="cursor: pointer;">
                         <div>
                             <h5 class="card-title">Orders Today</h5>
                             <h2 class="display-4 fw-bold">5</h2>
@@ -77,7 +77,6 @@
                         <span th:text="${u.username}" class="fw-bold">User</span>
                     </div>
                     <div>
-                        <!-- Thêm ?source=dashboard vào link -->
                         <a th:href="@{/admin/users/edit/{id}(id=${u.id}, source='dashboard')}" class="btn btn-sm btn-outline-warning py-0 px-1" title="Edit"><i class="fas fa-pen"></i></a>
                         <a th:href="@{/admin/users/delete/{id}(id=${u.id}, source='dashboard')}" class="btn btn-sm btn-outline-danger py-0 px-1" title="Delete" onclick="return confirm('Delete this user?');"><i class="fas fa-trash"></i></a>
                     </div>
@@ -97,7 +96,6 @@
                         <span th:text="${p.name}" class="fw-bold" title="${p.name}">Product</span>
                     </div>
                     <div>
-                        <!-- Thêm ?source=dashboard vào link -->
                         <a th:href="@{/admin/products/edit/{id}(id=${p.id}, source='dashboard')}" class="btn btn-sm btn-outline-warning py-0 px-1" title="Edit"><i class="fas fa-pen"></i></a>
                         <a th:href="@{/admin/products/delete/{id}(id=${p.id}, source='dashboard')}" class="btn btn-sm btn-outline-danger py-0 px-1" title="Delete" onclick="return confirm('Delete this product?');"><i class="fas fa-trash"></i></a>
                     </div>
@@ -135,7 +133,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function(){
-
             function setupSmartPopover(cardId, contentId) {
                 var card = document.getElementById(cardId);
                 var content = document.getElementById(contentId).innerHTML;

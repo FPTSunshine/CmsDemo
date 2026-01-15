@@ -1,5 +1,6 @@
 package com.hoangnm.cmsdemo.config;
 
+import com.hoangnm.cmsdemo.service.CustomOAuth2UserService;
 import com.hoangnm.cmsdemo.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,18 +23,24 @@ public class SecurityConfig {
     private CustomUserDetailsService customUserDetailsService;
 
     @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
+
+    @Autowired
+    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler; // Tiêm SuccessHandler
+
+    @Autowired
     private DataSource dataSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Tạm thời bỏ qua CSRF cho các đường dẫn public để test
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**", "/forgot-password", "/reset-password")
+                .ignoringRequestMatchers("/api/**")
             )
             .authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                .requestMatchers("/forgot-password", "/reset-password", "/verify-otp").permitAll()
+                .requestMatchers("/forgot-password", "/reset-password", "/verify-otp", "/resend-otp").permitAll()
+                .requestMatchers("/complete-registration").permitAll() // Cho phép truy cập trang hoàn tất đăng ký
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
@@ -43,6 +50,13 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .defaultSuccessUrl("/default", true)
                 .permitAll()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler(oAuth2LoginSuccessHandler) // Dùng SuccessHandler tùy chỉnh
             )
             .rememberMe((remember) -> remember
                 .tokenRepository(persistentTokenRepository())

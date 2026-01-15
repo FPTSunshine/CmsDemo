@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,7 +49,10 @@
                     <li class="nav-item"><a class="nav-link" href="#">Accessories</a></li>
                 </ul>
                 <div class="d-flex align-items-center">
-                    <span class="me-3 text-muted"><i class="fas fa-user-circle me-1"></i>Hi, User</span>
+                    <!-- Hiển thị tên username -->
+                    <span class="me-3 text-muted">
+                        <i class="fas fa-user-circle me-1"></i>Hi, <strong sec:authentication="name">Username</strong>
+                    </span>
                     <form th:action="@{/logout}" method="post">
                         <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
                     </form>
@@ -61,8 +64,7 @@
     <!-- Footer chung -->
     <footer th:fragment="footer">
         <div class="container text-center">
-            <p class="mb-1">&copy; 2024 CMS Demo Project. Built with Spring Boot & Thymeleaf.</p>
-            <small class="text-muted">Designed by You</small>
+            <p class="mb-1">Ringme muôn năm. Ngọc đại đế muôn năm</p>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </footer>

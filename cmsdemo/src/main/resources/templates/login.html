@@ -5,58 +5,100 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex; align-items: center; justify-content: center; height: 100vh;
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .card { width: 100%; max-width: 400px; border: none; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .btn-login { background: linear-gradient(to right, #667eea, #764ba2); border: none; }
-        .btn-login:hover { opacity: 0.9; }
+        .login-wrapper {
+            display: flex;
+            height: 100%;
+        }
+        .image-panel {
+            flex: 1.2; /* Cho ảnh chiếm nhiều không gian hơn một chút */
+            background-image: url('https://images.alphacoders.com/134/1342298.jpeg');
+            background-size: cover;
+            background-position: center;
+        }
+        .form-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-container .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .btn-login { background: #000; border: none; transition: background-color 0.3s; }
+        .btn-login:hover { background: #333; }
+        .btn-google { background-color: #fff; color: #444; border: 1px solid #ddd; transition: background-color 0.3s; }
+        .btn-google:hover { background-color: #f8f8f8; }
+
+        @media (max-width: 992px) {
+            .image-panel {
+                display: none; /* Ẩn ảnh trên tablet và mobile */
+            }
+            .form-panel {
+                flex: 1; /* Form chiếm toàn bộ màn hình */
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="card p-4">
-        <div class="card-body">
-            <div class="text-center mb-4">
-                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                    <i class="fas fa-user-shield fa-3x text-primary"></i>
-                </div>
-                <h3 class="fw-bold text-dark">Welcome Back</h3>
-                <p class="text-muted">Please sign in to continue</p>
-            </div>
+    <div class="login-wrapper">
+        <!-- Cột ảnh CR7 -->
+        <div class="image-panel"></div>
 
-            <div th:if="${param.error}" class="alert alert-danger text-center py-2 small">
-                <i class="fas fa-exclamation-circle me-1"></i> Invalid username or password!
-            </div>
-            <div th:if="${param.logout}" class="alert alert-success text-center py-2 small">
-                <i class="fas fa-check-circle me-1"></i> Logged out successfully.
-            </div>
+        <!-- Cột Form Login -->
+        <div class="form-panel">
+            <div class="form-container">
+                <div class="card p-4">
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal Logo" style="height: 70px;" class="mb-3"/>
+                            <h5 class="fw-bold text-dark">Năm nay là năm của chúng ta!</h5>
+                        </div>
 
-            <form th:action="@{/login}" method="post">
-                <div class="form-floating mb-3">
-                    <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Username" required autofocus/>
-                    <label for="floatingInput">Username</label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required/>
-                    <label for="floatingPassword">Password</label>
-                </div>
+                        <div th:if="${param.error}" class="alert alert-danger text-center py-2 small"><i class="fas fa-exclamation-circle me-1"></i> Invalid username or password!</div>
+                        <div th:if="${param.logout}" class="alert alert-success text-center py-2 small"><i class="fas fa-check-circle me-1"></i> Logged out successfully.</div>
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="form-check">
-                        <!-- Đổi id và name thành remember-me -->
-                        <input class="form-check-input" type="checkbox" name="remember-me" id="remember-me">
-                        <label class="form-check-label small" for="remember-me">Remember me</label>
+                        <form th:action="@{/login}" method="post">
+                            <div class="form-floating mb-3">
+                                <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Username" required autofocus/>
+                                <label for="floatingInput">Username</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required/>
+                                <label for="floatingPassword">Password</label>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="remember-me" id="remember-me">
+                                    <label class="form-check-label small" for="remember-me">Remember me</label>
+                                </div>
+                                <a th:href="@{/forgot-password}" class="small text-decoration-none">Forgot Password?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-login w-100 py-2 rounded-pill fw-bold text-uppercase">Sign In</button>
+                        </form>
+
+                        <div class="text-center my-3 small text-muted">OR</div>
+
+                        <a href="/oauth2/authorization/google" class="btn btn-google w-100 py-2 rounded-pill fw-bold">
+                            <img src="https://www.google.com/favicon.ico" height="20" class="me-2">
+                            Sign in with Google
+                        </a>
                     </div>
-                    <!-- Link Forgot Password -->
-                    <a th:href="@{/forgot-password}" class="small text-decoration-none">Forgot Password?</a>
                 </div>
-
-                <button type="submit" class="btn btn-primary btn-login w-100 py-2 rounded-pill fw-bold text-uppercase">Sign In</button>
-            </form>
-
-            <div class="text-center mt-4">
-                <small class="text-muted">Don't have an account? <a href="#" class="text-decoration-none fw-bold">Sign Up</a></small>
             </div>
         </div>
     </div>
