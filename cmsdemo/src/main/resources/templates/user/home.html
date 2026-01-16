@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/layout :: head}">
+<head th:replace="~{fragments/layout :: head(~{::style})}">
     <style>
         .product-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -9,62 +9,46 @@
             transform: translateY(-10px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
         }
-        .carousel-item {
-            background-size: cover;
-            background-position: center;
+        /* Style cho thông báo toast */
+        .toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1055;
         }
     </style>
 </head>
-<body>
+<body class="main-background d-flex flex-column min-vh-100">
 
-    <nav th:replace="~{fragments/layout :: user-header}"></nav>
+    <div th:replace="~{fragments/layout :: user-header}"></div>
 
-    <div id="heroCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active" style="height: 450px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1598327105666-0b6254315433?q=80&w=2070&auto=format&fit=crop');">
-                <div class="d-flex align-items-center justify-content-center h-100 text-white text-center">
-                    <div class="px-3">
-                        <h1 class="display-3 fw-bold">The Future is Now</h1>
-                        <p class="lead">Discover the latest in mobile technology.</p>
-                        <a href="#products" class="btn btn-light btn-lg rounded-pill px-4">Explore Products</a>
-                    </div>
-                </div>
-            </div>
-            <div class="carousel-item" style="height: 450px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=2070&auto=format&fit=crop');">
-                <div class="d-flex align-items-center justify-content-center h-100 text-white text-center">
-                    <div class="px-3">
-                        <h1 class="display-3 fw-bold">Unleash Your Creativity</h1>
-                        <p class="lead">Capture every moment with stunning clarity.</p>
-                        <a href="#products" class="btn btn-outline-light btn-lg rounded-pill px-4">View Collection</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
-        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
-    </div>
-
-    <main class="container mb-5" id="products">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">Featured Products</h2>
-            <a href="#" class="text-decoration-none">View All &rarr;</a>
+    <main class="container my-5 flex-grow-1" id="products">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-white" th:if="${categoryName}" th:text="${categoryName}">Category</h1>
+            <h1 class="display-4 fw-bold text-white" th:unless="${categoryName}">Our Collection</h1>
+            <p class="lead text-white-50">Find the best products curated for you.</p>
         </div>
 
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col" th:each="product : ${products}">
-                <div class="card h-100 border-0 shadow-sm product-card">
+                <div class="card h-100 border-0 shadow-sm product-card content-card">
                     <div class="position-relative">
                         <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Product Image">
                         <div th:unless="${product.imageUrl}" class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;"><i class="fas fa-image fa-2x"></i></div>
                         <span class="position-absolute top-0 end-0 badge bg-danger m-2">Hot</span>
                     </div>
 
-                    <div class="card-body d-flex flex-column">
+                    <div class="card-body d-flex flex-column bg-transparent">
                         <h5 class="card-title text-truncate" th:text="${product.name}">Product Name</h5>
                         <p class="card-text text-muted small text-truncate" th:text="${product.description}">Description...</p>
                         <div class="mt-auto d-flex justify-content-between align-items-center">
                             <span class="h5 mb-0 text-primary fw-bold" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Price</span>
-                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-cart-plus"></i></a>
+                            <!-- Thay form bằng button với data attribute -->
+                            <button class="btn btn-sm btn-outline-primary rounded-pill add-to-cart-btn"
+                                    th:data-product-id="${product.id}"
+                                    title="Add to Cart">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -72,7 +56,69 @@
         </div>
     </main>
 
-    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
 
+    <div class="mt-auto" th:replace="~{fragments/layout :: footer}"></div>
+
+    <!-- SCRIPT AJAX -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cartCountSpan = document.getElementById('cart-item-count');
+            const toastContainer = document.querySelector('.toast-container');
+
+            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
+
+                    fetch('/api/cart/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'productId=' + productId
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.totalItems) {
+                            // Cập nhật số lượng trên icon giỏ hàng
+                            if (cartCountSpan) {
+                                cartCountSpan.textContent = data.totalItems;
+                            } else {
+                                // Nếu span chưa có, tạo mới
+                                const newSpan = document.createElement('span');
+                                newSpan.id = 'cart-item-count';
+                                newSpan.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+                                newSpan.textContent = data.totalItems;
+                                document.querySelector('a[href="/cart"]').appendChild(newSpan);
+                            }
+                            showToast(data.message || 'Added to cart!', 'success');
+                        } else {
+                            showToast(data.message || 'Failed to add product.', 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred.', 'danger');
+                    });
+                });
+            });
+
+            function showToast(message, type = 'success') {
+                const toastId = 'toast-' + Date.now();
+                const toastHTML = `
+                    <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `;
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toastEl = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                toast.show();
+                toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+            }
+        });
+    </script>
 </body>
 </html>

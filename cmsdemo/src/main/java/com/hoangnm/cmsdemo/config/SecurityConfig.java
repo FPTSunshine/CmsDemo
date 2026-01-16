@@ -26,7 +26,7 @@ public class SecurityConfig {
     private CustomOAuth2UserService customOAuth2UserService;
 
     @Autowired
-    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler; // Tiêm SuccessHandler
+    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Autowired
     private DataSource dataSource;
@@ -35,15 +35,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**")
+                .ignoringRequestMatchers("/api/**", "/cart/**") // Tạm thời bỏ qua CSRF cho cart
             )
             .authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                 .requestMatchers("/forgot-password", "/reset-password", "/verify-otp", "/resend-otp").permitAll()
-                .requestMatchers("/complete-registration").permitAll() // Cho phép truy cập trang hoàn tất đăng ký
+                .requestMatchers("/complete-registration").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/user/**", "/cart/**").hasAnyRole("USER", "ADMIN") // Cho phép user và admin vào giỏ hàng
                 .anyRequest().authenticated()
             )
             .formLogin((form) -> form
@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                 )
-                .successHandler(oAuth2LoginSuccessHandler) // Dùng SuccessHandler tùy chỉnh
+                .successHandler(oAuth2LoginSuccessHandler)
             )
             .rememberMe((remember) -> remember
                 .tokenRepository(persistentTokenRepository())

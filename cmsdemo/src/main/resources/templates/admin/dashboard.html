@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head}"></head>
-<body>
+<head th:replace="~{fragments/layout :: head(pageStyles=null)}"></head>
+<body class="main-background d-flex flex-column min-vh-100">
 
-    <nav th:replace="~{fragments/layout :: admin-header}"></nav>
+    <div th:replace="~{fragments/layout :: admin-header}"></div>
 
-    <main class="container mt-4">
+    <main class="container mt-4 flex-grow-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-dark border-start border-5 border-primary ps-3">Dashboard Overview</h2>
-            <span class="text-muted">Welcome back, Admin!</span>
+            <h2 class="text-white border-start border-5 border-primary ps-3">Dashboard Overview</h2>
+            <span class="text-white-50">Welcome back, Admin!</span>
         </div>
 
         <div class="row g-4 mb-5">
-            <!-- Card User -->
             <div class="col-md-4">
-                <div class="card text-white bg-primary shadow h-100 dashboard-card"
-                     id="userCard"
-                     data-bs-toggle="popover"
-                     data-bs-html="true"
-                     title="Quick User Actions">
+                <div class="card text-white bg-primary shadow h-100 dashboard-card" id="userCard" data-bs-toggle="popover" data-bs-html="true" title="Quick User Actions">
                     <div class="card-body d-flex justify-content-between align-items-center" style="cursor: pointer;" onclick="window.location.href='/admin/users'">
                         <div>
                             <h5 class="card-title">Total Users</h5>
@@ -26,19 +21,11 @@
                         </div>
                         <i class="fas fa-users fa-4x opacity-50"></i>
                     </div>
-                    <div class="card-footer bg-primary border-0">
-                        <a th:href="@{/admin/users}" class="text-white text-decoration-none">Manage Users &rarr;</a>
-                    </div>
                 </div>
             </div>
 
-            <!-- Card Product -->
             <div class="col-md-4">
-                <div class="card text-white bg-success shadow h-100 dashboard-card"
-                     id="productCard"
-                     data-bs-toggle="popover"
-                     data-bs-html="true"
-                     title="Quick Product Actions">
+                <div class="card text-white bg-success shadow h-100 dashboard-card" id="productCard" data-bs-toggle="popover" data-bs-html="true" title="Quick Product Actions">
                     <div class="card-body d-flex justify-content-between align-items-center" style="cursor: pointer;" onclick="window.location.href='/admin/products'">
                         <div>
                             <h5 class="card-title">Total Products</h5>
@@ -46,135 +33,49 @@
                         </div>
                         <i class="fas fa-box-open fa-4x opacity-50"></i>
                     </div>
-                    <div class="card-footer bg-success border-0">
-                        <a th:href="@{/admin/products}" class="text-white text-decoration-none">Manage Products &rarr;</a>
-                    </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card text-white bg-warning shadow h-100 dashboard-card">
-                    <div class="card-body d-flex justify-content-between align-items-center" style="cursor: pointer;">
+                <div class="card text-white bg-warning shadow h-100 dashboard-card" onclick="window.location.href='/admin/orders'" style="cursor: pointer;">
+                    <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="card-title">Orders Today</h5>
-                            <h2 class="display-4 fw-bold">5</h2>
+                            <h2 class="display-4 fw-bold" th:text="${ordersTodayCount}">0</h2>
                         </div>
                         <i class="fas fa-shopping-cart fa-4x opacity-50"></i>
                     </div>
-                    <div class="card-footer bg-warning border-0">
-                        <a href="#" class="text-white text-decoration-none">View Orders &rarr;</a>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Nội dung ẩn dùng cho Popover (User List) -->
-        <div id="userPopoverContent" class="d-none">
-            <ul class="list-group list-group-flush small" style="min-width: 250px;">
-                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="u, iter : ${users}" th:if="${iter.index < 5}">
-                    <div>
-                        <i class="fas fa-user me-1 text-primary"></i>
-                        <span th:text="${u.username}" class="fw-bold">User</span>
-                    </div>
-                    <div>
-                        <a th:href="@{/admin/users/edit/{id}(id=${u.id}, source='dashboard')}" class="btn btn-sm btn-outline-warning py-0 px-1" title="Edit"><i class="fas fa-pen"></i></a>
-                        <a th:href="@{/admin/users/delete/{id}(id=${u.id}, source='dashboard')}" class="btn btn-sm btn-outline-danger py-0 px-1" title="Delete" onclick="return confirm('Delete this user?');"><i class="fas fa-trash"></i></a>
-                    </div>
-                </li>
-                <li class="list-group-item text-center" th:if="${users.size() > 5}">
-                    <a th:href="@{/admin/users}" class="text-decoration-none small">View all users...</a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Nội dung ẩn dùng cho Popover (Product List) -->
-        <div id="productPopoverContent" class="d-none">
-            <ul class="list-group list-group-flush small" style="min-width: 280px;">
-                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="p, iter : ${products}" th:if="${iter.index < 5}">
-                    <div class="text-truncate" style="max-width: 120px;">
-                        <i class="fas fa-box me-1 text-success"></i>
-                        <span th:text="${p.name}" class="fw-bold" title="${p.name}">Product</span>
-                    </div>
-                    <div>
-                        <a th:href="@{/admin/products/edit/{id}(id=${p.id}, source='dashboard')}" class="btn btn-sm btn-outline-warning py-0 px-1" title="Edit"><i class="fas fa-pen"></i></a>
-                        <a th:href="@{/admin/products/delete/{id}(id=${p.id}, source='dashboard')}" class="btn btn-sm btn-outline-danger py-0 px-1" title="Delete" onclick="return confirm('Delete this product?');"><i class="fas fa-trash"></i></a>
-                    </div>
-                </li>
-                <li class="list-group-item text-center" th:if="${products.size() > 5}">
-                    <a th:href="@{/admin/products}" class="text-decoration-none small">View all products...</a>
-                </li>
-            </ul>
-        </div>
+        <!-- ... (Popover content) ... -->
 
         <div class="row">
             <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">Sales Statistics</div>
-                    <div class="card-body text-center py-5 text-muted bg-light">
+                <div class="card shadow-sm content-card">
+                    <div class="card-header bg-transparent fw-bold">Sales Statistics</div>
+                    <div class="card-body text-center py-5 text-muted">
                         <i class="fas fa-chart-bar fa-3x mb-3"></i>
-                        <p>[Chart Placeholder] - Biểu đồ doanh thu sẽ hiển thị ở đây</p>
+                        <p>[Chart Placeholder]</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">Recent Activity</div>
+                <div class="card shadow-sm content-card">
+                    <div class="card-header bg-transparent fw-bold">Recent Activity</div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><small class="text-muted">2 mins ago</small><br/>User <strong>John</strong> registered.</li>
-                        <li class="list-group-item"><small class="text-muted">1 hour ago</small><br/>New order #1023 received.</li>
-                        <li class="list-group-item"><small class="text-muted">3 hours ago</small><br/>Product <strong>iPhone 15</strong> updated.</li>
+                        <li class="list-group-item bg-transparent"><small class="text-muted">2 mins ago</small><br/>User <strong>John</strong> registered.</li>
+                        <li class="list-group-item bg-transparent"><small class="text-muted">1 hour ago</small><br/>New order #1023 received.</li>
                     </ul>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer th:replace="~{fragments/layout :: footer}"></footer>
-
+    <div class="mt-auto" th:replace="~{fragments/layout :: footer}"></div>
     <script>
-        document.addEventListener("DOMContentLoaded", function(){
-            function setupSmartPopover(cardId, contentId) {
-                var card = document.getElementById(cardId);
-                var content = document.getElementById(contentId).innerHTML;
-                var popover = new bootstrap.Popover(card, {
-                    content: content,
-                    html: true,
-                    trigger: 'manual',
-                    sanitize: false
-                });
-
-                var timer = null;
-
-                card.addEventListener('mouseenter', function() {
-                    if(timer) clearTimeout(timer);
-                    popover.show();
-
-                    var popoverEl = document.querySelector('.popover');
-                    if(popoverEl) {
-                        popoverEl.addEventListener('mouseenter', function() {
-                            if(timer) clearTimeout(timer);
-                        });
-                        popoverEl.addEventListener('mouseleave', function() {
-                            timer = setTimeout(function() {
-                                popover.hide();
-                            }, 200);
-                        });
-                    }
-                });
-
-                card.addEventListener('mouseleave', function() {
-                    timer = setTimeout(function() {
-                        var popoverEl = document.querySelector('.popover:hover');
-                        if (!popoverEl) {
-                            popover.hide();
-                        }
-                    }, 200);
-                });
-            }
-
-            setupSmartPopover('userCard', 'userPopoverContent');
-            setupSmartPopover('productCard', 'productPopoverContent');
-        });
+        // ... (popover script)
     </script>
 </body>
 </html>

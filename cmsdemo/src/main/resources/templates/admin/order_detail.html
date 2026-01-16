@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(null)}"></head>
+<body class="main-background d-flex flex-column min-vh-100">
+
+    <div th:replace="~{fragments/layout :: admin-header}"></div>
+
+    <main class="container my-5 flex-grow-1">
+        <div class="card content-card shadow">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">Order Details</h2>
+                <a th:href="@{/admin/orders}" class="btn btn-secondary">&larr; Back to All Orders</a>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong>Order ID:</strong> #<span th:text="${order.id}"></span><br>
+                        <strong>Date:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <strong>User:</strong> <span th:text="${order.user.username}"></span><br>
+                        <strong>Status:</strong>
+                        <form th:action="@{/admin/orders/update-status/{id}(id=${order.id})}" method="post" class="d-inline-block">
+                            <select name="status" class="form-select form-select-sm" onchange="confirmStatusChange(this)" th:attr="data-old-status=${order.status}"
+                                    th:classappend="${order.status == 'Completed'} ? 'bg-success text-white' : (${order.status == 'Shipping'} ? 'bg-primary text-white' : 'bg-warning text-dark')">
+                                <option value="Placed" th:selected="${order.status == 'Placed'}">Placed</option>
+                                <option value="Shipping" th:selected="${order.status == 'Shipping'}">Shipping</option>
+                                <option value="Completed" th:selected="${order.status == 'Completed'}">Completed</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+                <!-- ... -->
+            </div>
+        </div>
+    </main>
+
+    <div class="mt-auto" th:replace="~{fragments/layout :: footer}"></div>
+    <script>
+        function confirmStatusChange(selectElement) {
+            const oldStatus = selectElement.getAttribute('data-old-status');
+            const newStatus = selectElement.value;
+            if (oldStatus === newStatus) return;
+            const confirmation = confirm(`Are you sure you want to change status from "${oldStatus}" to "${newStatus}"?`);
+            if (confirmation) {
+                selectElement.form.submit();
+            } else {
+                selectElement.value = oldStatus;
+            }
+        }
+    </script>
+</body>
+</html>

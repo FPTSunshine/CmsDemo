@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(null)}"></head>
+<body class="main-background d-flex flex-column min-vh-100">
+
+    <div th:replace="~{fragments/layout :: user-header}"></div>
+
+    <main class="container my-5 flex-grow-1">
+        <div class="card content-card shadow">
+            <div class="card-header bg-transparent border-bottom-0">
+                <h2 class="card-title text-center py-3"><i class="fas fa-receipt me-2"></i>My Orders</h2>
+            </div>
+            <div class="card-body">
+                <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                <div th:if="${#lists.isEmpty(orders)}" class="text-center py-5">
+                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                    <h4>You have no orders yet.</h4>
+                    <a th:href="@{/}" class="btn btn-primary mt-3">Start Shopping</a>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(orders)}" class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-end">Total Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${orders}">
+                                <td class="fw-bold">#<span th:text="${order.id}"></span></td>
+                                <td th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td class="text-center">
+                                    <span th:switch="${order.status}">
+                                        <span th:case="'Shipping'" class="badge bg-primary">Shipping</span>
+                                        <span th:case="'Completed'" class="badge bg-success">Completed</span>
+                                        <span th:case="*" class="badge bg-warning text-dark">Placed</span>
+                                    </span>
+                                </td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                <td class="text-end">
+                                    <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="mt-auto" th:replace="~{fragments/layout :: footer}"></div>
+
+</body>
+</html>
