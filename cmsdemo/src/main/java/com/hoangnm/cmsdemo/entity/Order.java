@@ -22,8 +22,8 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER) // Thêm fetch = FetchType.EAGER
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
-    private String status; // Thêm trường trạng thái đơn hàng
+    private String status;
 }

@@ -27,7 +27,38 @@
                         </span>
                     </div>
                 </div>
-                <!-- ... -->
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 60%;">Product</th>
+                                <th class="text-center">Price</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="detail : ${order.orderDetails}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${detail.product.imageUrl ?: '/images/placeholder.png'}" alt="Product" class="img-fluid rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <span th:text="${detail.product.name}">Product Name</span>
+                                    </div>
+                                </td>
+                                <td class="text-center" th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                <td class="text-center" th:text="${detail.quantity}"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(detail.price * detail.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold fs-5">
+                                <td colspan="3" class="text-end border-0">Total Price:</td>
+                                <td class="text-end border-0" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
         </div>
     </main>

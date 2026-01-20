@@ -1,10 +1,7 @@
 package com.hoangnm.cmsdemo.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "products")
@@ -12,6 +9,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString // Thêm lại annotation này để log in ra nội dung
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

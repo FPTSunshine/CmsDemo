@@ -7,12 +7,14 @@
 <body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
     <div class="card shadow p-4" style="max-width: 450px; width: 100%;">
         <h3 class="text-center mb-3">Complete Your Registration</h3>
-        <p class="text-muted text-center small">Your email <strong th:text="${email}"></strong> has been verified. Please set a username and password for your account.</p>
+        <!-- Sửa ${email} thành ${user.email} -->
+        <p class="text-muted text-center small">Your email <strong th:text="${user.email}"></strong> has been verified. Please set a username and password for your account.</p>
 
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
         <form th:action="@{/complete-registration}" method="post">
-            <input type="hidden" name="email" th:value="${email}" />
+            <!-- Sửa ${email} thành ${user.email} -->
+            <input type="hidden" name="email" th:value="${user.email}" />
 
             <div class="mb-3">
                 <label class="form-label">Username</label>

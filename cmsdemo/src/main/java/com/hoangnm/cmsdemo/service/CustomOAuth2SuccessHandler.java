@@ -27,12 +27,13 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user != null) {
+            // Nếu user đã tồn tại, để Spring tự xử lý (quay về trang cũ hoặc vào default)
             super.setDefaultTargetUrl("/default");
+            super.onAuthenticationSuccess(request, response, authentication);
         } else {
+            // Nếu user MỚI: Cưỡng chế chuyển hướng sang trang đăng ký
             request.getSession().setAttribute("OAUTH2_USER_EMAIL", email);
-            super.setDefaultTargetUrl("/complete-registration");
+            response.sendRedirect("/complete-registration");
         }
-
-        super.onAuthenticationSuccess(request, response, authentication);
     }
 }

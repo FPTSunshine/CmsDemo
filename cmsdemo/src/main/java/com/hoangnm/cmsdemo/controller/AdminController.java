@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin")
 public class AdminController {
 
-    public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/src/main/resources/static/uploads";
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -38,6 +36,8 @@ public class AdminController {
     private OrderRepository orderRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    private final List<String> productCategories = List.of("Phone", "Headphone", "Watch", "Case", "Charger");
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -91,7 +91,7 @@ public class AdminController {
         return "admin/users";
     }
 
-    @GetMapping("/users/new") // Sửa /create thành /new
+    @GetMapping("/users/new")
     public String showCreateUserForm(Model model) {
         model.addAttribute("user", new User());
         return "admin/user_form";
@@ -131,21 +131,16 @@ public class AdminController {
         return "admin/products";
     }
     
-    @GetMapping("/products/new") // Sửa /create thành /new
+    @GetMapping("/products/new")
     public String showCreateProductForm(Model model) {
         model.addAttribute("product", new Product());
+        model.addAttribute("categories", productCategories);
         return "admin/product_form";
     }
 
     @PostMapping("/products/save")
-    public String saveProduct(@ModelAttribute("product") Product product, @RequestParam("image") MultipartFile file, @RequestParam(value = "source", required = false) String source) throws IOException {
-        if (!file.isEmpty()) {
-            Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, file.getOriginalFilename());
-            Files.write(fileNameAndPath, file.getBytes());
-            product.setImageUrl("/uploads/" + file.getOriginalFilename());
-        }
+    public String saveProduct(@ModelAttribute("product") Product product) {
         productRepository.save(product);
-        if ("dashboard".equals(source)) { return "redirect:/admin/dashboard"; }
         return "redirect:/admin/products";
     }
 
@@ -153,6 +148,7 @@ public class AdminController {
     public String showEditProductForm(@PathVariable("id") Long id, @RequestParam(value = "source", required = false) String source, Model model) {
         Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid product Id:" + id));
         model.addAttribute("product", product);
+        model.addAttribute("categories", productCategories);
         model.addAttribute("source", source);
         return "admin/product_form";
     }

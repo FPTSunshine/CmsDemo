@@ -14,6 +14,11 @@ public class MainController {
     @Autowired
     private ProductRepository productRepository;
 
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/user/home";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -27,13 +32,12 @@ public class MainController {
         return "redirect:/user/home";
     }
     
-    // XÓA HÀM home() BỊ TRÙNG LẶP Ở ĐÂY
+    // HÀM GÂY XUNG ĐỘT ĐÃ BỊ XÓA
 
-    // Đường dẫn cho trang danh mục
     @GetMapping("/category/{name}")
     public String viewCategory(@PathVariable("name") String name, Model model) {
         model.addAttribute("products", productRepository.findByCategory(name));
         model.addAttribute("categoryName", name);
-        return "user/home"; // Tái sử dụng trang home để hiển thị
+        return "user/home";
     }
 }
