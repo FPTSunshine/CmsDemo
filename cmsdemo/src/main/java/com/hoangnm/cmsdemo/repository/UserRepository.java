@@ -12,10 +12,12 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
-    Optional<User> findByOtp(String otp);
+    boolean existsByUsername(String username);
+    Optional<User> findByResetToken(String token);
 
-    @Transactional
+    // Đổi tên hàm thành updateOtp và thêm token vào
     @Modifying
-    @Query("update User u set u.otp = ?1, u.otpRequestedTime = ?2 where u.email = ?3")
-    void updateOtp(String otp, LocalDateTime otpRequestedTime, String email);
+    @Transactional
+    @Query("UPDATE User u SET u.otp = ?1, u.otpRequestedTime = ?2, u.resetToken = ?3 WHERE u.email = ?4")
+    void updateOtp(String otp, LocalDateTime otpRequestedTime, String token, String email);
 }

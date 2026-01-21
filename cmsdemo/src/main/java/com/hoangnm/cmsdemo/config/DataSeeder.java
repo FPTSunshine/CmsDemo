@@ -102,7 +102,7 @@ public class DataSeeder implements CommandLineRunner {
         products.add(new Product(null, "Cáp Anker PowerLine III USB-C", 350000.0, "Bền bỉ, tốc độ cao.", "https://cdn.hoanghamobile.com/i/productlist/ts/1618386962.webp", "Charger"));
         products.add(new Product(null, "Pin Magsafe Apple Battery Pack", 2490000.0, "Pin dự phòng không dây chính hãng.", "https://cdn.hoanghamobile.com/i/productlist/ts/1626333983.webp", "Charger"));
         products.add(new Product(null, "Sạc Innostyle Minigo 20W", 290000.0, "Giá rẻ, sạc nhanh, nhỏ gọn.", "https://cdn.hoanghamobile.com/i/productlist/ts/1632731086.webp", "Charger"));
-        
+
         productRepository.saveAll(products);
     }
 

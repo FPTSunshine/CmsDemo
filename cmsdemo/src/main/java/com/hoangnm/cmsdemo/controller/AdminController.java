@@ -8,6 +8,8 @@ import com.hoangnm.cmsdemo.repository.ProductRepository;
 import com.hoangnm.cmsdemo.repository.UserRepository;
 import com.hoangnm.cmsdemo.service.OrderSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,16 +19,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
+
+    public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/src/main/resources/static/uploads";
 
     @Autowired
     private UserRepository userRepository;
@@ -49,6 +56,7 @@ public class AdminController {
         return "admin/dashboard";
     }
 
+    // ... Order methods (giữ nguyên) ...
     @GetMapping("/orders")
     public String listAllOrders(@RequestParam(value = "userId", required = false) Long userId,
                                 @RequestParam(value = "orderDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate orderDate,
@@ -85,6 +93,7 @@ public class AdminController {
         return "redirect:/admin/orders";
     }
 
+    // ... User methods (giữ nguyên) ...
     @GetMapping("/users")
     public String listUsers(Model model) {
         model.addAttribute("users", userRepository.findAll());
@@ -125,9 +134,14 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
+    // ... Product methods ...
+
     @GetMapping("/products")
-    public String listProducts(Model model) {
-        model.addAttribute("products", productRepository.findAll());
+    public String listProducts(Model model, @RequestParam(defaultValue = "0") int page) {
+        Page<Product> productPage = productRepository.findAll(PageRequest.of(page, 10));
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
         return "admin/products";
     }
     

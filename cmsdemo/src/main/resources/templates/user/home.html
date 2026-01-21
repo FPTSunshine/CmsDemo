@@ -9,7 +9,6 @@
             transform: translateY(-10px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
         }
-        /* Style cho thông báo toast */
         .toast-container {
             position: fixed;
             bottom: 1rem;
@@ -22,14 +21,15 @@
 
     <div th:replace="~{fragments/layout :: user-header}"></div>
 
-    <main class="container my-5 flex-grow-1" id="products">
+    <main class="container-fluid px-5 my-5 flex-grow-1" id="products"> <!-- Đổi container thành container-fluid px-5 để rộng hơn -->
         <div class="text-center mb-5">
             <h1 class="display-4 fw-bold text-white" th:if="${categoryName}" th:text="${categoryName}">Category</h1>
             <h1 class="display-4 fw-bold text-white" th:unless="${categoryName}">Our Collection</h1>
             <p class="lead text-white-50">Find the best products curated for you.</p>
         </div>
 
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        <!-- Sửa grid: 5 cột trên màn hình lớn, 2 cột trên màn hình nhỏ/vừa -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-4">
             <div class="col" th:each="product : ${products}">
                 <div class="card h-100 border-0 shadow-sm product-card content-card">
                     <div class="position-relative">
@@ -43,7 +43,6 @@
                         <p class="card-text text-muted small text-truncate" th:text="${product.description}">Description...</p>
                         <div class="mt-auto d-flex justify-content-between align-items-center">
                             <span class="h5 mb-0 text-primary fw-bold" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Price</span>
-                            <!-- Thay form bằng button với data attribute -->
                             <button class="btn btn-sm btn-outline-primary rounded-pill add-to-cart-btn"
                                     th:data-product-id="${product.id}"
                                     title="Add to Cart">
@@ -54,14 +53,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="mt-5" th:if="${totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/user/home(page=${currentPage - 1})}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{/user/home(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/user/home(page=${currentPage + 1})}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </main>
 
-    <!-- Toast Container -->
     <div class="toast-container"></div>
 
     <div class="mt-auto" th:replace="~{fragments/layout :: footer}"></div>
 
-    <!-- SCRIPT AJAX -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const cartCountSpan = document.getElementById('cart-item-count');
@@ -79,11 +95,9 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.totalItems) {
-                            // Cập nhật số lượng trên icon giỏ hàng
                             if (cartCountSpan) {
                                 cartCountSpan.textContent = data.totalItems;
                             } else {
-                                // Nếu span chưa có, tạo mới
                                 const newSpan = document.createElement('span');
                                 newSpan.id = 'cart-item-count';
                                 newSpan.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';

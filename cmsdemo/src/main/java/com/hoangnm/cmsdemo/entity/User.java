@@ -8,28 +8,28 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Data
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
     private String role;
-    
-    @Column(unique = true)
-    private String email;
-    
-    // OTP
+
+    // Các trường cho chức năng "Quên mật khẩu"
+    private String resetToken;
     private String otp;
     private LocalDateTime otpRequestedTime;
 
-    // OAuth2 specific fields
-    private boolean isOAuth2User = false; // True if user logged in via OAuth2 and needs to complete registration
-    private String tempOAuth2Email; // Temporarily store email for OAuth2 users
+    // Các trường cho chức năng OAuth2
+    private boolean isOAuth2User;
+    private String tempOAuth2Email;
 }

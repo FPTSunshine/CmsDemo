@@ -47,7 +47,12 @@ public class OtpApiController {
         }
 
         String otp = String.format("%06d", new Random().nextInt(999999));
-        userRepository.updateOtp(otp, LocalDateTime.now(), email);
+        
+        // Lấy token hiện tại để giữ nguyên
+        String currentToken = user.getResetToken();
+        
+        // Cập nhật OTP và giữ nguyên token cũ
+        userRepository.updateOtp(otp, LocalDateTime.now(), currentToken, email);
 
         try {
             emailService.sendOtpEmail(email, otp);

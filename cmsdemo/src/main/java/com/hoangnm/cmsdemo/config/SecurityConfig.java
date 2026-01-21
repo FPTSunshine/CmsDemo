@@ -36,7 +36,7 @@ public class SecurityConfig {
     private DataSource dataSource;
 
     @Autowired
-    private ClientRegistrationRepository clientRegistrationRepository; // Inject repository này
+    private ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -45,9 +45,10 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/api/**", "/cart/**")
             )
             .authorizeHttpRequests((requests) -> requests
+                // Thêm /** để đảm bảo bao phủ cả các tham số query string
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                .requestMatchers("/forgot-password", "/reset-password", "/verify-otp", "/resend-otp").permitAll()
-                .requestMatchers("/complete-registration").permitAll()
+                .requestMatchers("/forgot-password/**", "/reset-password/**", "/verify-otp/**", "/resend-otp/**").permitAll()
+                .requestMatchers("/complete-registration/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**", "/cart/**", "/orders/**").hasAnyRole("USER", "ADMIN")
@@ -64,7 +65,6 @@ public class SecurityConfig {
                     .userService(customOAuth2UserService)
                 )
                 .successHandler(customOAuth2SuccessHandler)
-                // Cấu hình để luôn hiện màn hình chọn tài khoản
                 .authorizationEndpoint(authorization -> authorization
                     .authorizationRequestResolver(authorizationRequestResolver(clientRegistrationRepository))
                 )

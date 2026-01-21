@@ -47,6 +47,25 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-4" th:if="${totalPages > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/products(page=${currentPage - 1})}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/products(page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/products(page=${currentPage + 1})}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
         <div class="mt-3">

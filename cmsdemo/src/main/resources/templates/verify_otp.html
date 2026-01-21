@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-light">
-    <!-- Nút Back ở góc trên -->
     <a href="javascript:history.back()" class="position-absolute top-0 start-0 m-3 text-secondary fs-5">
         <i class="fas fa-arrow-left"></i> Back
     </a>
@@ -16,11 +15,13 @@
             <h3 class="text-center mb-3">Verify OTP</h3>
             <p class="text-muted text-center small">An OTP has been sent to <strong th:text="${email}">your email</strong>. Please enter it below.</p>
 
-            <!-- Vùng hiển thị thông báo từ AJAX -->
             <div id="message-container" class="mb-3"></div>
 
             <form th:action="@{/verify-otp}" method="post">
+                <!-- Thêm hidden input cho token -->
+                <input type="hidden" name="token" th:value="${token}" />
                 <input type="hidden" name="email" th:value="${email}" />
+
                 <div class="mb-3">
                     <input type="text" name="otp" class="form-control text-center" placeholder="Enter 6-digit OTP" required maxlength="6" />
                 </div>
@@ -39,7 +40,6 @@
             const email = this.getAttribute('data-email');
             const messageContainer = document.getElementById('message-container');
 
-            // Hiển thị loading
             messageContainer.innerHTML = '<div class="alert alert-info">Sending...</div>';
 
             fetch('/api/otp/resend', {
