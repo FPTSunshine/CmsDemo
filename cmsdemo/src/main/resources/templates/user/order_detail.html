@@ -23,6 +23,7 @@
                         <span th:switch="${order.status}">
                             <span th:case="'Shipping'" class="badge bg-primary">Shipping</span>
                             <span th:case="'Completed'" class="badge bg-success">Completed</span>
+                            <span th:case="'Cancel'" class="badge bg-danger">Cancelled</span>
                             <span th:case="*" class="badge bg-warning text-dark">Placed</span>
                         </span>
                     </div>

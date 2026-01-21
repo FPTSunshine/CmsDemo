@@ -12,6 +12,9 @@
                 <a th:href="@{/admin/orders}" class="btn btn-secondary">&larr; Back to All Orders</a>
             </div>
             <div class="card-body p-4">
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <strong>Order ID:</strong> #<span th:text="${order.id}"></span><br>
@@ -20,14 +23,30 @@
                     <div class="col-md-6 text-md-end">
                         <strong>User:</strong> <span th:text="${order.user.username}"></span><br>
                         <strong>Status:</strong>
-                        <form th:action="@{/admin/orders/update-status/{id}(id=${order.id})}" method="post" class="d-inline-block">
-                            <select name="status" class="form-select form-select-sm" onchange="confirmStatusChange(this)" th:attr="data-old-status=${order.status}"
-                                    th:classappend="${order.status == 'Completed'} ? 'bg-success text-white' : (${order.status == 'Shipping'} ? 'bg-primary text-white' : 'bg-warning text-dark')">
-                                <option value="Placed" th:selected="${order.status == 'Placed'}">Placed</option>
-                                <option value="Shipping" th:selected="${order.status == 'Shipping'}">Shipping</option>
-                                <option value="Completed" th:selected="${order.status == 'Completed'}">Completed</option>
+
+                        <!-- Dropdown cho Placed -->
+                        <form th:if="${order.status == 'Placed'}" th:action="@{/admin/orders/update-status/{id}(id=${order.id})}" method="post" class="d-inline-block">
+                            <select name="status" class="form-select form-select-sm bg-warning text-dark" onchange="confirmStatusChange(this)" th:attr="data-old-status=${order.status}">
+                                <option value="Placed" selected>Placed</option>
+                                <option value="Shipping">Shipping</option>
+                                <option value="Cancel">Cancel</option>
                             </select>
                         </form>
+
+                        <!-- Dropdown cho Shipping -->
+                        <form th:if="${order.status == 'Shipping'}" th:action="@{/admin/orders/update-status/{id}(id=${order.id})}" method="post" class="d-inline-block">
+                            <select name="status" class="form-select form-select-sm bg-primary text-white" onchange="confirmStatusChange(this)" th:attr="data-old-status=${order.status}">
+                                <option value="Shipping" selected>Shipping</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancel">Cancel</option>
+                            </select>
+                        </form>
+
+                        <!-- Disabled cho Completed -->
+                        <span th:if="${order.status == 'Completed'}" class="badge bg-success fs-6">Completed</span>
+
+                        <!-- Disabled cho Cancel -->
+                        <span th:if="${order.status == 'Cancel'}" class="badge bg-danger fs-6">Cancelled</span>
                     </div>
                 </div>
 

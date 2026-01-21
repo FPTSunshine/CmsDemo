@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,11 +53,10 @@ public class AdminController {
         model.addAttribute("products", productRepository.findAll());
         model.addAttribute("userCount", userRepository.count());
         model.addAttribute("productCount", productRepository.count());
-        model.addAttribute("ordersTodayCount", orderRepository.countByOrderDateAfter(LocalDate.now().atStartOfDay()));
+        model.addAttribute("totalOrdersCount", orderRepository.count());
         return "admin/dashboard";
     }
 
-    // ... Order methods (giữ nguyên) ...
     @GetMapping("/orders")
     public String listAllOrders(@RequestParam(value = "userId", required = false) Long userId,
                                 @RequestParam(value = "orderDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate orderDate,
@@ -70,9 +70,11 @@ public class AdminController {
         Specification<Order> spec = OrderSpecification.filterBy(userId, orderDate, minPrice, maxPrice);
         List<Order> allOrders = orderRepository.findAll(spec);
 
+        // Thêm danh sách CancelledOrders
         model.addAttribute("placedOrders", allOrders.stream().filter(o -> "Placed".equals(o.getStatus())).collect(Collectors.toList()));
         model.addAttribute("shippingOrders", allOrders.stream().filter(o -> "Shipping".equals(o.getStatus())).collect(Collectors.toList()));
         model.addAttribute("completedOrders", allOrders.stream().filter(o -> "Completed".equals(o.getStatus())).collect(Collectors.toList()));
+        model.addAttribute("cancelledOrders", allOrders.stream().filter(o -> "Cancel".equals(o.getStatus())).collect(Collectors.toList()));
         
         model.addAttribute("allUsers", userRepository.findAll());
         return "admin/orders";
@@ -86,14 +88,37 @@ public class AdminController {
     }
 
     @PostMapping("/orders/update-status/{id}")
-    public String updateOrderStatus(@PathVariable("id") Long id, @RequestParam("status") String status) {
+    public String updateOrderStatus(@PathVariable("id") Long id, @RequestParam("status") String newStatus, RedirectAttributes redirectAttributes) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid order Id:" + id));
-        order.setStatus(status);
-        orderRepository.save(order);
+        String currentStatus = order.getStatus();
+
+        // Logic kiểm tra trạng thái chặt chẽ
+        boolean isValid = false;
+
+        if ("Placed".equals(currentStatus)) {
+            if ("Shipping".equals(newStatus) || "Cancel".equals(newStatus)) {
+                isValid = true;
+            }
+        } else if ("Shipping".equals(currentStatus)) {
+            if ("Completed".equals(newStatus) || "Cancel".equals(newStatus)) {
+                isValid = true;
+            }
+        }
+        // Completed và Cancel là trạng thái cuối, không thể thay đổi
+
+        if (isValid) {
+            order.setStatus(newStatus);
+            orderRepository.save(order);
+            redirectAttributes.addFlashAttribute("message", "Order status updated successfully.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Invalid status transition from " + currentStatus + " to " + newStatus);
+        }
+
         return "redirect:/admin/orders";
     }
 
-    // ... User methods (giữ nguyên) ...
+    // ... (Giữ nguyên các hàm User và Product) ...
+
     @GetMapping("/users")
     public String listUsers(Model model) {
         model.addAttribute("users", userRepository.findAll());
@@ -134,14 +159,9 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    // ... Product methods ...
-
     @GetMapping("/products")
-    public String listProducts(Model model, @RequestParam(defaultValue = "0") int page) {
-        Page<Product> productPage = productRepository.findAll(PageRequest.of(page, 10));
-        model.addAttribute("products", productPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", productPage.getTotalPages());
+    public String listProducts(Model model) {
+        model.addAttribute("products", productRepository.findAll());
         return "admin/products";
     }
     
